@@ -11,12 +11,19 @@ namespace ConsoleMinesweeper
         private static char MarkedCell = '*';
         private static char ClosedCell = '#';
 
+        //Key settings
+        private const ConsoleKey MarkKey = ConsoleKey.W;
+        private const ConsoleKey OpenKey = ConsoleKey.Enter;
+        private const ConsoleKey LeftKey = ConsoleKey.LeftArrow;
+        private const ConsoleKey UpKey = ConsoleKey.UpArrow;
+        private const ConsoleKey RightKey = ConsoleKey.RightArrow;
+        private const ConsoleKey DownKey = ConsoleKey.DownArrow;
+        private const ConsoleKey YesKey = ConsoleKey.Y;
+
         private static Game _game;
 
         private static int cursorTop = 0;
         private static int cursorLeft = 0;
-
-
 
         public static void Main(string[] args)
         {
@@ -68,8 +75,8 @@ namespace ConsoleMinesweeper
                 {
                     Console.Clear();
                     Console.WriteLine("Бах! Вы проиграли. Нажмите \"y\" чтобы сыграть еще раз или любую клавишу для выхода.");
-                    var answer = Console.ReadKey();
-                    return answer.Key == ConsoleKey.Y;
+                    var answer = Console.ReadKey(true);
+                    return answer.Key == YesKey;
                 }
 
 
@@ -77,8 +84,8 @@ namespace ConsoleMinesweeper
                 {
                     Console.Clear();
                     Console.WriteLine("Победа! Нажмите \"y\" чтобы сыграть еще раз или любую клавишу для выхода.");
-                    var answer = Console.ReadKey();
-                    return answer.Key == ConsoleKey.Y;
+                    var answer = Console.ReadKey(true);
+                    return answer.Key == YesKey;
                 }
 
                 var key = Console.ReadKey(true).Key;
@@ -88,40 +95,36 @@ namespace ConsoleMinesweeper
                     case ConsoleKey.Escape:
                         return false;
 
-                    case ConsoleKey.LeftArrow:
+                    case LeftKey:
                         if (cursorLeft != 0)
                         {
                             cursorLeft -= 1;
-                            //             Console.SetCursorPosition(cursorLeft, cursorTop);
                         }
 
                         break;
 
-                    case ConsoleKey.UpArrow:
+                    case UpKey:
                         if (cursorTop != 0)
                         {
                             cursorTop -= 1;
-                            //        Console.SetCursorPosition(cursorLeft, cursorTop);
                         }
                         break;
 
-                    case ConsoleKey.RightArrow:
+                    case RightKey:
                         if (cursorLeft != _game.Width - 1)
                         {
                             cursorLeft += 1;
-                            //         Console.SetCursorPosition(cursorLeft, cursorTop);
                         }
                         break;
 
-                    case ConsoleKey.DownArrow:
+                    case DownKey:
                         if (cursorTop != _game.Height - 1)
                         {
                             cursorTop += 1;
-                            //         Console.SetCursorPosition(cursorLeft, cursorTop);
                         }
                         break;
 
-                    case ConsoleKey.Enter:
+                    case OpenKey:
                         if (_game[cursorLeft, cursorTop].State != CellState.Marked)
                         {
                             _game.OpenCell(cursorLeft, cursorTop);
@@ -129,7 +132,7 @@ namespace ConsoleMinesweeper
                         }
                         break;
 
-                    case ConsoleKey.W:
+                    case MarkKey:
                         _game.Mark(cursorLeft, cursorTop);
                         Draw();
                         break;

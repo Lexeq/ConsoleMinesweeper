@@ -25,6 +25,8 @@ namespace ConsoleMinesweeper
             }
         }
 
+        public int Marked { get; private set; }
+
         public GameState State { get; private set; }
 
         /// <summary>
@@ -129,41 +131,90 @@ namespace ConsoleMinesweeper
             SetMinesCount();
         }
 
-        public CellInfo this[int x, int y]
+        private int CountMarkedAround(int x, int y)
         {
-            get
-            {
-                var state = cellStates[x, y];
-                var mines = state == CellState.Opened ? gameField[x, y] : -1;
-                return new CellInfo(state, mines);
-            }
+            int count = 0;
+            if (x - 1 >= 0 && cellStates[x - 1, y] == CellState.Marked)
+                count++;
+            if (x + 1 < Width && cellStates[x + 1, y] == CellState.Marked)
+                count++;
+            if (y - 1 >= 0 && cellStates[x, y - 1] == CellState.Marked)
+                count++;
+            if (y + 1 < Height && cellStates[x, y + 1] == CellState.Marked)
+                count++;
+
+            if (x - 1 >= 0 && y - 1 >= 0 && cellStates[x - 1, y - 1] == CellState.Marked)
+                count++;
+            if (x + 1 < Width && y + 1 < Height && cellStates[x + 1, y + 1] == CellState.Marked)
+                count++;
+            if (x - 1 >= 0 && y + 1 < Height && cellStates[x - 1, y + 1] == CellState.Marked)
+                count++;
+            if (x + 1 < Width && y - 1 >= 0 && cellStates[x + 1, y - 1] == CellState.Marked)
+                count++;
+            return count;
         }
 
-        private void OpenCell(int x, int y, bool[,] wasChecked)
+        private void OpenCells(int x, int y, bool[,] wasChecked)
         {
             wasChecked[x, y] = true;
             if (gameField[x, y] == 0)
             {
                 if (x + 1 < Width && !wasChecked[x + 1, y] && cellStates[x + 1, y] == 0)
-                    OpenCell(x + 1, y, wasChecked);
+                    OpenCells(x + 1, y, wasChecked);
                 if (x - 1 >= 0 && !wasChecked[x - 1, y] && cellStates[x - 1, y] == 0)
-                    OpenCell(x - 1, y, wasChecked);
+                    OpenCells(x - 1, y, wasChecked);
                 if (y + 1 < Height && !wasChecked[x, y + 1] && cellStates[x, y + 1] == 0)
-                    OpenCell(x, y + 1, wasChecked);
+                    OpenCells(x, y + 1, wasChecked);
                 if (y - 1 >= 0 && !wasChecked[x, y - 1] && cellStates[x, y - 1] == 0)
-                    OpenCell(x, y - 1, wasChecked);
+                    OpenCells(x, y - 1, wasChecked);
 
                 if (x + 1 < Width && y - 1 >= 0 && !wasChecked[x + 1, y - 1] && cellStates[x + 1, y - 1] == 0)
-                    OpenCell(x + 1, y - 1, wasChecked);
+                    OpenCells(x + 1, y - 1, wasChecked);
                 if (x + 1 < Width && y + 1 < Height && !wasChecked[x + 1, y + 1] && cellStates[x + 1, y + 1] == 0)
-                    OpenCell(x + 1, y + 1, wasChecked);
+                    OpenCells(x + 1, y + 1, wasChecked);
                 if (x - 1 >= 0 && y - 1 >= 0 && !wasChecked[x - 1, y - 1] && cellStates[x - 1, y - 1] == 0)
-                    OpenCell(x - 1, y - 1, wasChecked);
+                    OpenCells(x - 1, y - 1, wasChecked);
                 if (x - 1 >= 0 && y + 1 < Height && !wasChecked[x - 1, y + 1] && cellStates[x - 1, y + 1] == 0)
-                    OpenCell(x - 1, y + 1, wasChecked);
+                    OpenCells(x - 1, y + 1, wasChecked);
             }
             cellStates[x, y] = CellState.Opened;
             NeedsOpen--;
+        }
+
+        private void Open(int x, int y)
+        {
+            if (gameField[x, y] == 9)
+            {
+                State = GameState.Lose;
+                return;
+            }
+
+            if (cellStates[x, y] == CellState.Opened)
+            {
+                if (CountMarkedAround(x, y) == gameField[x, y])
+                {
+                    if (x - 1 >= 0 && cellStates[x - 1, y] == CellState.Closed)
+                        Open(x - 1, y);
+                    if (x + 1 < Width && cellStates[x + 1, y] == CellState.Closed)
+                        Open(x + 1, y);
+                    if (y - 1 >= 0 && cellStates[x, y - 1] == CellState.Closed)
+                        Open(x, y - 1);
+                    if (y + 1 < Height && cellStates[x, y + 1] == CellState.Closed)
+                        Open(x, y + 1);
+
+                    if (x - 1 >= 0 && y - 1 >= 0 && cellStates[x - 1, y - 1] == CellState.Closed)
+                        Open(x - 1, y - 1);
+                    if (x + 1 < Width && y + 1 < Height && cellStates[x + 1, y + 1] == CellState.Closed)
+                        Open(x + 1, y + 1);
+                    if (x - 1 >= 0 && y + 1 < Height && cellStates[x - 1, y + 1] == CellState.Closed)
+                        Open(x - 1, y + 1);
+                    if (x + 1 < Width && y - 1 >= 0 && cellStates[x + 1, y - 1] == CellState.Closed)
+                        Open(x + 1, y - 1);
+                }
+            }
+
+            bool[,] mask = new bool[Width, Height];
+            OpenCells(x, y, mask);
         }
 
         public void OpenCell(int x, int y)
@@ -173,29 +224,35 @@ namespace ConsoleMinesweeper
                 SetMines(x, y);
                 State = GameState.Running;
             }
-
+            
             if (State != GameState.Running)
                 throw new InvalidOperationException("Game over");
 
-            if (cellStates[x, y] == CellState.Opened)
-                return;
-
-            if (gameField[x, y] == 9)
-            {
-                State = GameState.Lose;
-                return;
-            }
-
-            bool[,] mask = new bool[Width, Height];
-            OpenCell(x, y, mask);
+            Open(x, y);
         }
 
         public void Mark(int x, int y)
         {
-            if (cellStates[x, y] == CellState.Opened)
-                return;
+            if(cellStates[x,y] == CellState.Marked)
+            {
+                cellStates[x, y] = CellState.Closed;
+                Marked--;
+            }
+            else if(cellStates[x,y] == CellState.Closed)
+            {
+                cellStates[x,y] = CellState.Marked;
+                Marked++;
+            }
+        }
 
-            cellStates[x, y] = cellStates[x, y] == CellState.Marked ? CellState.Closed : CellState.Marked;
+        public CellInfo this[int x, int y]
+        {
+            get
+            {
+                var state = cellStates[x, y];
+                var mines = state == CellState.Opened ? gameField[x, y] : -1;
+                return new CellInfo(state, mines);
+            }
         }
     }
 }
