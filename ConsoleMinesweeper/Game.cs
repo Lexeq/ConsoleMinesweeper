@@ -115,7 +115,7 @@ namespace ConsoleMinesweeper
             {
                 for (int j = 0; j < Height; j++)
                 {
-                    if (i != x && j != y)
+                    if (i != x || j != y)
                     {
                         pts.Add(new Point(i, j));
                     }
@@ -212,9 +212,11 @@ namespace ConsoleMinesweeper
                         Open(x + 1, y - 1);
                 }
             }
-
-            bool[,] mask = new bool[Width, Height];
-            OpenCells(x, y, mask);
+            else
+            {
+                bool[,] mask = new bool[Width, Height];
+                OpenCells(x, y, mask);
+            }
         }
 
         public void OpenCell(int x, int y)
