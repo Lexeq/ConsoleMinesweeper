@@ -29,7 +29,6 @@ namespace ConsoleMinesweeper
         {
             do
             {
-                _game = new Game(15, 15, 15);
                 Console.WriteLine("Нажмите любую клавишу для начала игры...");
                 Console.ReadKey(true);
             } while (Start());
@@ -60,13 +59,74 @@ namespace ConsoleMinesweeper
                 }
             }
             Console.WriteLine("W - пометить клетку, Enter - открыть");
-            Console.WriteLine("Всего мин: " + _game.Mines);
+            Console.WriteLine("Всего мин: {0} Отмечено {1}", _game.Mines, _game.Marked);
             Console.WriteLine("Осталось открыть ячеек: " + _game.NeedsOpen);
             Console.SetCursorPosition(cursorLeft, cursorTop);
         }
 
+        private static Game InitGame()
+        {
+            Console.Clear();
+
+            Console.WriteLine("1 - Легкий");
+            Console.WriteLine("2 - Средний");
+            Console.WriteLine("3 - Тяжелый");
+            Console.WriteLine("5 - Настроить");
+            Console.Write("0 - Выход");
+
+            while (true)
+            {
+                var key = Console.ReadKey(true).Key;
+                if (key == ConsoleKey.D1 || key == ConsoleKey.NumPad1)
+                    return new Game(9, 9, 10);
+                else if (key == ConsoleKey.D2 || key == ConsoleKey.NumPad2)
+                    return new Game(16, 16, 40);
+                else if (key == ConsoleKey.D3 || key == ConsoleKey.NumPad3)
+                    return new Game(30, 16, 99);
+                else if (key == ConsoleKey.D5 || key == ConsoleKey.NumPad5)                   
+                {
+                    var param = GetParameters();
+                    return new Game(param.Item1, param.Item2, param.Item3);
+                }
+                else if (key ==  ConsoleKey.D0 || key == ConsoleKey.NumPad0)
+                    Environment.Exit(0);
+            }
+        }
+
+        private static Tuple<int, int, int> GetParameters()
+        {
+            int w, h, m;
+            int wMax = 50;
+            int hMax = 50;
+
+            while (true)
+            {
+                Console.Clear();
+
+                Console.Write("Введите ширину ({0} - {1}): ", 2, wMax);
+                bool wFlag = int.TryParse(Console.ReadLine(), out w) && w > 1 && w <= wMax;
+
+                Console.Write("Введите высоту ({0} - {1}): ", 2, hMax);
+                bool hFlag = int.TryParse(Console.ReadLine(), out h) && h > 1 && h <= hMax;
+
+                Console.Write("Введите количество мин ({0} - {1}): ", 1, w * h - 2);
+                bool mFlag = int.TryParse(Console.ReadLine(), out m) && m > 0 && m <= w * h - 2;
+
+                if (wFlag && hFlag && mFlag)
+                    return new Tuple<int, int, int>(w, h, m);
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Недопустимые параметры!");
+                    Console.ResetColor();
+                    Console.ReadKey(true);
+                }
+            }
+        }
+
         public static bool Start()
         {
+            _game = InitGame();
             Draw();
             while (true)
             {
