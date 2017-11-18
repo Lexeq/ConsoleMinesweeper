@@ -7,7 +7,19 @@ namespace ConsoleMinesweeper
 {
     public class Game
     {
-        public int _needsOpen;
+        private int _needsOpen;
+
+        /// <summary>
+        /// 0 - свободная клетка
+        /// 1 - 8 - количество мин вокруг клетки
+        /// 9 - мина
+        /// </summary>
+        private int[,] gameField;
+
+        private CellState[,] cellStates;
+
+        private Random rnd = new Random();
+
         public int Width { get; private set; }
 
         public int Height { get; private set; }
@@ -28,17 +40,6 @@ namespace ConsoleMinesweeper
         public int Marked { get; private set; }
 
         public GameState State { get; private set; }
-
-        /// <summary>
-        /// 0 - свободная клетка
-        /// 1 - 8 - количество мин вокруг клетки
-        /// 9 - мина
-        /// </summary>
-        private int[,] gameField;
-
-        private CellState[,] cellStates;
-
-        private Random rnd = new Random();
 
         public Game()
             : this(9, 9, 10)
@@ -159,22 +160,22 @@ namespace ConsoleMinesweeper
             wasChecked[x, y] = true;
             if (gameField[x, y] == 0)
             {
-                if (x + 1 < Width && !wasChecked[x + 1, y] && cellStates[x + 1, y] == 0)
+                if (x + 1 < Width && !wasChecked[x + 1, y] && cellStates[x + 1, y] == CellState.Closed)
                     OpenCells(x + 1, y, wasChecked);
-                if (x - 1 >= 0 && !wasChecked[x - 1, y] && cellStates[x - 1, y] == 0)
+                if (x - 1 >= 0 && !wasChecked[x - 1, y] && cellStates[x - 1, y] == CellState.Closed)
                     OpenCells(x - 1, y, wasChecked);
-                if (y + 1 < Height && !wasChecked[x, y + 1] && cellStates[x, y + 1] == 0)
+                if (y + 1 < Height && !wasChecked[x, y + 1] && cellStates[x, y + 1] == CellState.Closed)
                     OpenCells(x, y + 1, wasChecked);
-                if (y - 1 >= 0 && !wasChecked[x, y - 1] && cellStates[x, y - 1] == 0)
+                if (y - 1 >= 0 && !wasChecked[x, y - 1] && cellStates[x, y - 1] == CellState.Closed)
                     OpenCells(x, y - 1, wasChecked);
 
-                if (x + 1 < Width && y - 1 >= 0 && !wasChecked[x + 1, y - 1] && cellStates[x + 1, y - 1] == 0)
+                if (x + 1 < Width && y - 1 >= 0 && !wasChecked[x + 1, y - 1] && cellStates[x + 1, y - 1] == CellState.Closed)
                     OpenCells(x + 1, y - 1, wasChecked);
-                if (x + 1 < Width && y + 1 < Height && !wasChecked[x + 1, y + 1] && cellStates[x + 1, y + 1] == 0)
+                if (x + 1 < Width && y + 1 < Height && !wasChecked[x + 1, y + 1] && cellStates[x + 1, y + 1] == CellState.Closed)
                     OpenCells(x + 1, y + 1, wasChecked);
-                if (x - 1 >= 0 && y - 1 >= 0 && !wasChecked[x - 1, y - 1] && cellStates[x - 1, y - 1] == 0)
+                if (x - 1 >= 0 && y - 1 >= 0 && !wasChecked[x - 1, y - 1] && cellStates[x - 1, y - 1] == CellState.Closed)
                     OpenCells(x - 1, y - 1, wasChecked);
-                if (x - 1 >= 0 && y + 1 < Height && !wasChecked[x - 1, y + 1] && cellStates[x - 1, y + 1] == 0)
+                if (x - 1 >= 0 && y + 1 < Height && !wasChecked[x - 1, y + 1] && cellStates[x - 1, y + 1] == CellState.Closed)
                     OpenCells(x - 1, y + 1, wasChecked);
             }
             cellStates[x, y] = CellState.Opened;

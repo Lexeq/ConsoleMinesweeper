@@ -83,12 +83,12 @@ namespace ConsoleMinesweeper
                     return new Game(16, 16, 40);
                 else if (key == ConsoleKey.D3 || key == ConsoleKey.NumPad3)
                     return new Game(30, 16, 99);
-                else if (key == ConsoleKey.D5 || key == ConsoleKey.NumPad5)                   
+                else if (key == ConsoleKey.D5 || key == ConsoleKey.NumPad5)
                 {
                     var param = GetParameters();
                     return new Game(param.Item1, param.Item2, param.Item3);
                 }
-                else if (key ==  ConsoleKey.D0 || key == ConsoleKey.NumPad0)
+                else if (key == ConsoleKey.D0 || key == ConsoleKey.NumPad0)
                     Environment.Exit(0);
             }
         }
@@ -158,7 +158,7 @@ namespace ConsoleMinesweeper
                     case LeftKey:
                         if (cursorLeft != 0)
                         {
-                            cursorLeft -= 1;
+                            cursorLeft--;
                         }
 
                         break;
@@ -166,21 +166,21 @@ namespace ConsoleMinesweeper
                     case UpKey:
                         if (cursorTop != 0)
                         {
-                            cursorTop -= 1;
+                            cursorTop--;
                         }
                         break;
 
                     case RightKey:
                         if (cursorLeft != _game.Width - 1)
                         {
-                            cursorLeft += 1;
+                            cursorLeft++;
                         }
                         break;
 
                     case DownKey:
                         if (cursorTop != _game.Height - 1)
                         {
-                            cursorTop += 1;
+                            cursorTop++;
                         }
                         break;
 
