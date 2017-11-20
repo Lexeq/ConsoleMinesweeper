@@ -18,7 +18,7 @@ namespace ConsoleMinesweeper
         private const ConsoleKey UpKey = ConsoleKey.UpArrow;
         private const ConsoleKey RightKey = ConsoleKey.RightArrow;
         private const ConsoleKey DownKey = ConsoleKey.DownArrow;
-        private const ConsoleKey YesKey = ConsoleKey.Y;
+        private const ConsoleKey YesKey = ConsoleKey.Enter;
 
         private static Game _game;
 
@@ -27,11 +27,9 @@ namespace ConsoleMinesweeper
 
         public static void Main(string[] args)
         {
-            do
-            {
-                Console.WriteLine("Нажмите любую клавишу для начала игры...");
-                Console.ReadKey(true);
-            } while (Start());
+            Console.WriteLine("Добро пожаловать в игру \"Сапер\". Нажмите любую клавишу для начала игры...");
+            Console.ReadKey(true);
+            while (Start()) { }
         }
 
         private static void Draw()
@@ -41,7 +39,6 @@ namespace ConsoleMinesweeper
             {
                 for (int x = 0; x < _game.Width; x++)
                 {
-
                     if (_game[x, y].State == CellState.Opened)
                     {
                         if (_game[x, y].MinesAround == 0)
@@ -71,7 +68,7 @@ namespace ConsoleMinesweeper
             Console.WriteLine("1 - Легкий");
             Console.WriteLine("2 - Средний");
             Console.WriteLine("3 - Тяжелый");
-            Console.WriteLine("5 - Настроить");
+            Console.WriteLine("5 - Настроить\n");
             Console.Write("0 - Выход");
 
             while (true)
@@ -124,64 +121,51 @@ namespace ConsoleMinesweeper
             }
         }
 
+        private static bool ShowEndGameScreen(bool win)
+        {
+            Console.Clear();
+            Console.Write(win ? "Победа!" : "Бах! Вы проиграли.");
+            Console.WriteLine(" Нажмите '{0}' чтобы сыграть еще раз или любую клавишу для выхода.", YesKey);
+            var answer = Console.ReadKey(true);
+            return answer.Key == YesKey;
+        }
+
         public static bool Start()
         {
             _game = InitGame();
             Draw();
             while (true)
             {
-
                 if (_game.State == GameState.Lose)
-                {
-                    Console.Clear();
-                    Console.WriteLine("Бах! Вы проиграли. Нажмите \"y\" чтобы сыграть еще раз или любую клавишу для выхода.");
-                    var answer = Console.ReadKey(true);
-                    return answer.Key == YesKey;
-                }
-
+                    return ShowEndGameScreen(false);
 
                 if (_game.State == GameState.Win)
-                {
-                    Console.Clear();
-                    Console.WriteLine("Победа! Нажмите \"y\" чтобы сыграть еще раз или любую клавишу для выхода.");
-                    var answer = Console.ReadKey(true);
-                    return answer.Key == YesKey;
-                }
+                    return ShowEndGameScreen(true);
 
                 var key = Console.ReadKey(true).Key;
-
                 switch (key)
                 {
                     case ConsoleKey.Escape:
-                        return false;
+                        return true;
 
                     case LeftKey:
                         if (cursorLeft != 0)
-                        {
                             cursorLeft--;
-                        }
-
                         break;
 
                     case UpKey:
                         if (cursorTop != 0)
-                        {
                             cursorTop--;
-                        }
                         break;
 
                     case RightKey:
                         if (cursorLeft != _game.Width - 1)
-                        {
                             cursorLeft++;
-                        }
                         break;
 
                     case DownKey:
                         if (cursorTop != _game.Height - 1)
-                        {
                             cursorTop++;
-                        }
                         break;
 
                     case OpenKey:
