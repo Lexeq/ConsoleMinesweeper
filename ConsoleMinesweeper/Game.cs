@@ -63,6 +63,27 @@ namespace ConsoleMinesweeper
             State = GameState.Ready;
         }
 
+        private void ForEachArround(int x, int y, Action<int, int> action)
+        {
+            if (x - 1 >= 0)
+                action(x - 1, y);
+            if (x + 1 < Width)
+                action(x + 1, y);
+            if (y - 1 >= 0)
+                action(x, y - 1);
+            if (y + 1 < Height)
+                action(x, y + 1);
+
+            if (x - 1 >= 0 && y - 1 >= 0)
+                action(x - 1, y - 1);
+            if (x - 1 >= 0 && y + 1 < Height)
+                action(x - 1, y + 1);
+            if (x + 1 < Width && y + 1 < Height)
+                action(x + 1, y + 1);
+            if (x + 1 < Width && y - 1 >= 0)
+                action(x + 1, y - 1);
+        }
+
         private void SetMinesCount()
         {
             for (int x = 0; x < Width; x++)
@@ -73,36 +94,10 @@ namespace ConsoleMinesweeper
                         continue;
 
                     int count = 0;
-
-                    bool up = x - 1 >= 0;
-                    bool down = x + 1 < Width;
-                    bool left = y - 1 >= 0;
-                    bool right = y + 1 < Height;
-
-                    if (up && gameField[x - 1, y] == 9)
-                        count++;
-
-                    if (down && gameField[x + 1, y] == 9)
-                        count++;
-
-                    if (left && gameField[x, y - 1] == 9)
-                        count++;
-
-                    if (right && gameField[x, y + 1] == 9)
-                        count++;
-
-                    if (up && left && gameField[x - 1, y - 1] == 9)
-                        count++;
-
-                    if (up && right && gameField[x - 1, y + 1] == 9)
-                        count++;
-
-                    if (down && right && gameField[x + 1, y + 1] == 9)
-                        count++;
-
-                    if (down && left && gameField[x + 1, y - 1] == 9)
-                        count++;
-
+                    ForEachArround(x, y, (a, b) => {
+                        if (gameField[a, b] == 9)
+                            count++;
+                    });
                     gameField[x, y] = count;
                 }
             }
@@ -135,23 +130,11 @@ namespace ConsoleMinesweeper
         private int CountMarkedAround(int x, int y)
         {
             int count = 0;
-            if (x - 1 >= 0 && cellStates[x - 1, y] == CellState.Marked)
-                count++;
-            if (x + 1 < Width && cellStates[x + 1, y] == CellState.Marked)
-                count++;
-            if (y - 1 >= 0 && cellStates[x, y - 1] == CellState.Marked)
-                count++;
-            if (y + 1 < Height && cellStates[x, y + 1] == CellState.Marked)
-                count++;
-
-            if (x - 1 >= 0 && y - 1 >= 0 && cellStates[x - 1, y - 1] == CellState.Marked)
-                count++;
-            if (x + 1 < Width && y + 1 < Height && cellStates[x + 1, y + 1] == CellState.Marked)
-                count++;
-            if (x - 1 >= 0 && y + 1 < Height && cellStates[x - 1, y + 1] == CellState.Marked)
-                count++;
-            if (x + 1 < Width && y - 1 >= 0 && cellStates[x + 1, y - 1] == CellState.Marked)
-                count++;
+            ForEachArround(x, y, (a, b) =>
+                {
+                    if (cellStates[a, b] == CellState.Marked)
+                        count++;
+                });
             return count;
         }
 
@@ -160,23 +143,11 @@ namespace ConsoleMinesweeper
             wasChecked[x, y] = true;
             if (gameField[x, y] == 0)
             {
-                if (x + 1 < Width && !wasChecked[x + 1, y] && cellStates[x + 1, y] == CellState.Closed)
-                    OpenCells(x + 1, y, wasChecked);
-                if (x - 1 >= 0 && !wasChecked[x - 1, y] && cellStates[x - 1, y] == CellState.Closed)
-                    OpenCells(x - 1, y, wasChecked);
-                if (y + 1 < Height && !wasChecked[x, y + 1] && cellStates[x, y + 1] == CellState.Closed)
-                    OpenCells(x, y + 1, wasChecked);
-                if (y - 1 >= 0 && !wasChecked[x, y - 1] && cellStates[x, y - 1] == CellState.Closed)
-                    OpenCells(x, y - 1, wasChecked);
-
-                if (x + 1 < Width && y - 1 >= 0 && !wasChecked[x + 1, y - 1] && cellStates[x + 1, y - 1] == CellState.Closed)
-                    OpenCells(x + 1, y - 1, wasChecked);
-                if (x + 1 < Width && y + 1 < Height && !wasChecked[x + 1, y + 1] && cellStates[x + 1, y + 1] == CellState.Closed)
-                    OpenCells(x + 1, y + 1, wasChecked);
-                if (x - 1 >= 0 && y - 1 >= 0 && !wasChecked[x - 1, y - 1] && cellStates[x - 1, y - 1] == CellState.Closed)
-                    OpenCells(x - 1, y - 1, wasChecked);
-                if (x - 1 >= 0 && y + 1 < Height && !wasChecked[x - 1, y + 1] && cellStates[x - 1, y + 1] == CellState.Closed)
-                    OpenCells(x - 1, y + 1, wasChecked);
+                ForEachArround(x, y, (a, b) =>
+                    {
+                        if (cellStates[a, b] == CellState.Closed && !wasChecked[a, b])
+                            OpenCells(a, b, wasChecked);
+                    });
             }
             cellStates[x, y] = CellState.Opened;
             NeedsOpen--;
@@ -194,23 +165,11 @@ namespace ConsoleMinesweeper
             {
                 if (CountMarkedAround(x, y) == gameField[x, y])
                 {
-                    if (x - 1 >= 0 && cellStates[x - 1, y] == CellState.Closed)
-                        Open(x - 1, y);
-                    if (x + 1 < Width && cellStates[x + 1, y] == CellState.Closed)
-                        Open(x + 1, y);
-                    if (y - 1 >= 0 && cellStates[x, y - 1] == CellState.Closed)
-                        Open(x, y - 1);
-                    if (y + 1 < Height && cellStates[x, y + 1] == CellState.Closed)
-                        Open(x, y + 1);
-
-                    if (x - 1 >= 0 && y - 1 >= 0 && cellStates[x - 1, y - 1] == CellState.Closed)
-                        Open(x - 1, y - 1);
-                    if (x + 1 < Width && y + 1 < Height && cellStates[x + 1, y + 1] == CellState.Closed)
-                        Open(x + 1, y + 1);
-                    if (x - 1 >= 0 && y + 1 < Height && cellStates[x - 1, y + 1] == CellState.Closed)
-                        Open(x - 1, y + 1);
-                    if (x + 1 < Width && y - 1 >= 0 && cellStates[x + 1, y - 1] == CellState.Closed)
-                        Open(x + 1, y - 1);
+                    ForEachArround(x, y, (a, b) =>
+                    {
+                        if (cellStates[a, b] == CellState.Closed)
+                            Open(a, b);
+                    });
                 }
             }
             else
@@ -227,7 +186,7 @@ namespace ConsoleMinesweeper
                 SetMines(x, y);
                 State = GameState.Running;
             }
-            
+
             if (State != GameState.Running)
                 throw new InvalidOperationException("Game over");
 
@@ -236,14 +195,14 @@ namespace ConsoleMinesweeper
 
         public void Mark(int x, int y)
         {
-            if(cellStates[x,y] == CellState.Marked)
+            if (cellStates[x, y] == CellState.Marked)
             {
                 cellStates[x, y] = CellState.Closed;
                 Marked--;
             }
-            else if(cellStates[x,y] == CellState.Closed)
+            else if (cellStates[x, y] == CellState.Closed)
             {
-                cellStates[x,y] = CellState.Marked;
+                cellStates[x, y] = CellState.Marked;
                 Marked++;
             }
         }
